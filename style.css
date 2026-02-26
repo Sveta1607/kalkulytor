@@ -23,14 +23,24 @@ body {
   box-shadow: 0 4px 20px rgba(0,0,0,0.4);
 }
 
-/* Заголовок и подзаголовок (светлый текст на тёмном) */
+/* Заголовок и описание по центру (светлый текст на тёмном) */
 h1 {
   font-size: 1.5rem;
   color: #e8e8e8;
   margin-bottom: 0.25rem;
+  text-align: center;
+}
+
+.page-description {
+  text-align: center;
+  color: #c8c8d0;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
 }
 
 .subtitle {
+  text-align: center;
   color: #a0a0a8;
   font-size: 0.9rem;
   margin-bottom: 1.5rem;
