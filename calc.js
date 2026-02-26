@@ -40,6 +40,26 @@ function updateVolumeLabel() {
   volumeLabelEl.textContent = type === 'cleaning' ? 'Площадь, м²' : 'Часы';
 }
 
+/**
+ * Для фриланса опции «Выезд» и «Срочный + Выезд» недоступны; при переключении на фриланс сбрасываем их выбор.
+ */
+function updateExtraOptions() {
+  var type = getServiceType();
+  var optVisit = extraOptionEl.querySelector('option[value="visit"]');
+  var optBoth = extraOptionEl.querySelector('option[value="both"]');
+
+  if (type === 'freelance') {
+    optVisit.disabled = true;
+    optBoth.disabled = true;
+    if (extraOptionEl.value === 'visit' || extraOptionEl.value === 'both') {
+      extraOptionEl.value = '';
+    }
+  } else {
+    optVisit.disabled = false;
+    optBoth.disabled = false;
+  }
+}
+
 /** Максимально допустимый объём (защита от нереалистичных значений). */
 var MAX_VOLUME = 100000;
 
@@ -128,8 +148,11 @@ function showError(message) {
   resultBlock.hidden = false;
 }
 
-// ——— При смене типа услуги (кнопки) меняем подпись поля «Объём» ———
-serviceTypeGroupEl.addEventListener('change', updateVolumeLabel);
+// ——— При смене типа услуги: подпись «Объём» и доступность опций «Выезд» / «Срочный + Выезд» ———
+serviceTypeGroupEl.addEventListener('change', function () {
+  updateVolumeLabel();
+  updateExtraOptions();
+});
 
 // ——— При отправке формы: сначала проверка крайних случаев, затем расчёт ———
 formEl.addEventListener('submit', function (e) {
@@ -143,5 +166,6 @@ formEl.addEventListener('submit', function (e) {
   showResult(price);
 });
 
-// Подставляем подпись при первой загрузке страницы
+// Подставляем подпись и доступность доп. опций при первой загрузке страницы
 updateVolumeLabel();
+updateExtraOptions();
