@@ -18,20 +18,25 @@ var VISIT_FEE = 500;      // доп. плата за выезд (для клин
 
 // ——— Ссылки на элементы страницы (получаем один раз при загрузке) ———
 var formEl = document.getElementById('calc-form');
-var serviceTypeEl = document.getElementById('service-type');
+var serviceTypeGroupEl = document.getElementById('service-type-group');
 var volumeEl = document.getElementById('volume');
 var volumeLabelEl = document.getElementById('volume-label');
 var extraOptionEl = document.getElementById('extra-option');
 var resultBlock = document.getElementById('result');
 var resultPriceEl = document.getElementById('result-price');
 
+/** Возвращает значение выбранного типа услуги (кнопки-radio). */
+function getServiceType() {
+  var checked = serviceTypeGroupEl.querySelector('input:checked');
+  return checked ? checked.value : 'cleaning';
+}
+
 /**
  * Обновляет подпись поля «Объём» в зависимости от типа услуги:
  * клининг — «Площадь, м²», ремонт/фриланс — «Часы».
  */
 function updateVolumeLabel() {
-  var type = serviceTypeEl.value;
-  var cfg = PRICES[type];
+  var type = getServiceType();
   volumeLabelEl.textContent = type === 'cleaning' ? 'Площадь, м²' : 'Часы';
 }
 
@@ -40,7 +45,7 @@ function updateVolumeLabel() {
  * @returns {number} сумма в рублях
  */
 function calculate() {
-  var type = serviceTypeEl.value;
+  var type = getServiceType();
   var volume = Number(volumeEl.value) || 0;
   var extra = extraOptionEl.value;
 
@@ -72,8 +77,8 @@ function showResult(price) {
   resultBlock.hidden = false;
 }
 
-// ——— При смене типа услуги меняем подпись поля «Объём» ———
-serviceTypeEl.addEventListener('change', updateVolumeLabel);
+// ——— При смене типа услуги (кнопки) меняем подпись поля «Объём» ———
+serviceTypeGroupEl.addEventListener('change', updateVolumeLabel);
 
 // ——— При отправке формы: считаем цену и показываем результат ———
 formEl.addEventListener('submit', function (e) {

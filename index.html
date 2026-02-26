@@ -14,14 +14,16 @@
 
     <!-- Форма: тип услуги, объём, доп. опции -->
     <form id="calc-form" class="form">
-      <label>
-        <span>Тип услуги</span>
-        <select id="service-type" required>
-          <option value="cleaning">Клининг (уборка)</option>
-          <option value="repair">Ремонт</option>
-          <option value="freelance">Фриланс</option>
-        </select>
-      </label>
+      <!-- Тип услуги: выбор кнопками (скрытые radio, визуально — кнопки) -->
+      <div class="field-label">Тип услуги</div>
+      <div id="service-type-group" class="service-type-buttons" role="group">
+        <input type="radio" name="service-type" id="st-cleaning" value="cleaning" checked>
+        <label for="st-cleaning">Клининг</label>
+        <input type="radio" name="service-type" id="st-repair" value="repair">
+        <label for="st-repair">Ремонт</label>
+        <input type="radio" name="service-type" id="st-freelance" value="freelance">
+        <label for="st-freelance">Фриланс</label>
+      </div>
 
       <!-- Объём: для клининга — м², для ремонта/фриланса — часы -->
       <label>

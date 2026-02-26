@@ -5,71 +5,121 @@
   padding: 0;
 }
 
+/* Тёмная тема: фон страницы */
 body {
   font-family: system-ui, -apple-system, sans-serif;
-  background: #f5f5f5;
+  background: #1a1a1e;
   padding: 2rem;
   min-height: 100vh;
 }
 
-/* Центрированный блок калькулятора с тенью и фоном */
+/* Центрированный блок калькулятора, тёмный фон и тень */
 .container {
   max-width: 420px;
   margin: 0 auto;
-  background: #fff;
+  background: #2d2d33;
   padding: 2rem;
   border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
 }
 
-/* Заголовок и подзаголовок */
+/* Заголовок и подзаголовок (светлый текст на тёмном) */
 h1 {
   font-size: 1.5rem;
-  color: #1a1a1a;
+  color: #e8e8e8;
   margin-bottom: 0.25rem;
 }
 
 .subtitle {
-  color: #666;
+  color: #a0a0a8;
   font-size: 0.9rem;
   margin-bottom: 1.5rem;
 }
 
-/* Общие стили для полей формы: отступ и блок */
+/* Подпись для блока (тип услуги, поля формы) */
+.form .field-label,
+.form label span:first-child {
+  display: block;
+  font-weight: 500;
+  color: #c8c8d0;
+  margin-bottom: 0.35rem;
+  font-size: 0.9rem;
+}
+
 .form label {
   display: block;
   margin-bottom: 1rem;
 }
 
-.form label span:first-child {
-  display: block;
-  font-weight: 500;
-  color: #333;
-  margin-bottom: 0.35rem;
-  font-size: 0.9rem;
+/* Кнопки выбора типа услуги: скрытые radio, label выглядят как кнопки */
+.service-type-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
 }
 
-/* Поля ввода и выпадающий список */
+.service-type-buttons input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.service-type-buttons label {
+  flex: 1;
+  min-width: 80px;
+  padding: 0.6rem 0.75rem;
+  background: #3d3d45;
+  color: #c8c8d0;
+  border: 1px solid #4a4a54;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  text-align: center;
+  cursor: pointer;
+  margin-bottom: 0;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.service-type-buttons label:hover {
+  background: #45454e;
+}
+
+.service-type-buttons input:checked + label {
+  background: #4a4a54;
+  border-color: #6b6b78;
+  color: #fff;
+}
+
+/* Поля ввода и выпадающий список под тёмную тему */
 .form select,
 .form input[type="number"] {
   width: 100%;
   padding: 0.6rem 0.75rem;
-  border: 1px solid #ccc;
+  background: #3d3d45;
+  border: 1px solid #4a4a54;
   border-radius: 8px;
   font-size: 1rem;
+  color: #e8e8e8;
 }
 
 .form select:focus,
 .form input[type="number"]:focus {
   outline: none;
-  border-color: #4a90d9;
+  border-color: #7c6b9e;
 }
 
-/* Кнопка расчёта */
-.form button {
+.form select option {
+  background: #3d3d45;
+  color: #e8e8e8;
+}
+
+/* Кнопка «Рассчитать цену» — тёмно-фиолетовая */
+.form button[type="submit"] {
   width: 100%;
   padding: 0.75rem 1rem;
-  background: #4a90d9;
+  background: #3d2d5c;
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -78,28 +128,28 @@ h1 {
   cursor: pointer;
 }
 
-.form button:hover {
-  background: #3a7bc8;
+.form button[type="submit"]:hover {
+  background: #4d3a6e;
 }
 
-/* Блок результата: показывается после нажатия «Рассчитать» */
+/* Блок результата в тёмной теме, по центру */
 .result {
   margin-top: 1.5rem;
   padding: 1.25rem;
-  background: #f0f7ff;
+  background: #3d3d45;
   border-radius: 8px;
-  border: 1px solid #c5daf0;
+  border: 1px solid #4a4a54;
   text-align: center;
 }
 
 .result-label {
   font-size: 0.9rem;
-  color: #555;
+  color: #a0a0a8;
   margin-bottom: 0.25rem;
 }
 
 .result-price {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: #e8e8e8;
 }
