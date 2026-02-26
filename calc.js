@@ -40,6 +40,46 @@ function updateVolumeLabel() {
   volumeLabelEl.textContent = type === 'cleaning' ? 'Площадь, м²' : 'Часы';
 }
 
+/** Максимально допустимый объём (защита от нереалистичных значений). */
+var MAX_VOLUME = 100000;
+
+/**
+ * Проверка крайних случаев ввода. Возвращает строку ошибки или null, если всё ок.
+ * @returns {string|null}
+ */
+function validateInput() {
+  var raw = (volumeEl.value || '').trim();
+
+  // 1. Пустое поле объёма
+  if (raw === '') {
+    return 'Введите объём (площадь или часы).';
+  }
+
+  var volume = Number(volumeEl.value);
+
+  // 2. Введено не число (буквы, символы)
+  if (Number.isNaN(volume)) {
+    return 'Объём должен быть числом.';
+  }
+
+  // 3. Ноль
+  if (volume === 0) {
+    return 'Объём не может быть нулём.';
+  }
+
+  // 4. Отрицательное значение
+  if (volume < 0) {
+    return 'Объём не может быть отрицательным.';
+  }
+
+  // 5. Слишком большое число (переполнение / опечатка)
+  if (volume > MAX_VOLUME) {
+    return 'Укажите объём не больше ' + MAX_VOLUME + '.';
+  }
+
+  return null;
+}
+
 /**
  * Считает итоговую цену по выбранным параметрам.
  * @returns {number} сумма в рублях
@@ -74,15 +114,31 @@ function calculate() {
  */
 function showResult(price) {
   resultPriceEl.textContent = price.toLocaleString('ru-RU') + ' ₽';
+  resultPriceEl.classList.remove('is-error');
+  resultBlock.hidden = false;
+}
+
+/**
+ * Показывает в блоке результата сообщение об ошибке валидации.
+ * @param {string} message — текст ошибки
+ */
+function showError(message) {
+  resultPriceEl.textContent = message;
+  resultPriceEl.classList.add('is-error');
   resultBlock.hidden = false;
 }
 
 // ——— При смене типа услуги (кнопки) меняем подпись поля «Объём» ———
 serviceTypeGroupEl.addEventListener('change', updateVolumeLabel);
 
-// ——— При отправке формы: считаем цену и показываем результат ———
+// ——— При отправке формы: сначала проверка крайних случаев, затем расчёт ———
 formEl.addEventListener('submit', function (e) {
   e.preventDefault();
+  var error = validateInput();
+  if (error) {
+    showError(error);
+    return;
+  }
   var price = calculate();
   showResult(price);
 });
