@@ -21,8 +21,7 @@ var formEl = document.getElementById('calc-form');
 var serviceTypeEl = document.getElementById('service-type');
 var volumeEl = document.getElementById('volume');
 var volumeLabelEl = document.getElementById('volume-label');
-var urgentEl = document.getElementById('urgent');
-var visitEl = document.getElementById('visit');
+var extraOptionEl = document.getElementById('extra-option');
 var resultBlock = document.getElementById('result');
 var resultPriceEl = document.getElementById('result-price');
 
@@ -43,8 +42,7 @@ function updateVolumeLabel() {
 function calculate() {
   var type = serviceTypeEl.value;
   var volume = Number(volumeEl.value) || 0;
-  var isUrgent = urgentEl.checked;
-  var isVisit = visitEl.checked;
+  var extra = extraOptionEl.value;
 
   var cfg = PRICES[type];
   if (!cfg || volume <= 0) return 0;
@@ -52,13 +50,13 @@ function calculate() {
   // Базовая сумма: цена за единицу × объём
   var total = cfg.perUnit * volume;
 
-  // Надбавка за срочность (процент от текущей суммы)
-  if (isUrgent) {
+  // Надбавка за срочность (если выбрано в выпадающем списке)
+  if (extra === 'urgent' || extra === 'both') {
     total = total * (1 + URGENT_PERCENT / 100);
   }
 
-  // Фиксированная доплата за выезд
-  if (isVisit) {
+  // Фиксированная доплата за выезд (если выбрано в выпадающем списке)
+  if (extra === 'visit' || extra === 'both') {
     total = total + VISIT_FEE;
   }
 

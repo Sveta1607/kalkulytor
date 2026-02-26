@@ -29,18 +29,16 @@
         <input type="number" id="volume" min="1" step="1" value="50" required>
       </label>
 
-      <!-- Дополнительные опции (чекбоксы) -->
-      <fieldset class="options">
-        <legend>Дополнительно</legend>
-        <label class="checkbox">
-          <input type="checkbox" id="urgent">
-          <span>Срочный заказ (+20%)</span>
-        </label>
-        <label class="checkbox">
-          <input type="checkbox" id="visit">
-          <span>Выезд (доп. фикс)</span>
-        </label>
-      </fieldset>
+      <!-- Дополнительно — выбор одной опции из выпадающего списка -->
+      <label>
+        <span>Дополнительно</span>
+        <select id="extra-option">
+          <option value="">Без доп. опций</option>
+          <option value="urgent">Срочный заказ (+20%)</option>
+          <option value="visit">Выезд (+500 ₽)</option>
+          <option value="both">Срочный + Выезд</option>
+        </select>
+      </label>
 
       <button type="submit">Рассчитать цену</button>
     </form>
