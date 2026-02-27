@@ -61,41 +61,37 @@ h1 {
   margin-bottom: 1rem;
 }
 
-/* Сетка 17 кнопок категорий — одинаковый размер каждой кнопки */
+/* Сетка категорий — вертикально по 2 в ряду */
 .categories-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.5rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.4rem;
   margin-bottom: 0.5rem;
 }
 
-@media (max-width: 600px) {
-  .categories-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-/* Кнопка категории: одинаковые размеры */
+/* Кнопка категории — яркие, хорошо читаемые надписи */
 .cat-btn {
-  min-height: 2.5rem;
-  padding: 0.5rem 0.6rem;
-  background: #3d3d45;
-  color: #c8c8d0;
-  border: 1px solid #4a4a54;
-  border-radius: 8px;
-  font-size: 0.85rem;
+  min-height: 2.25rem;
+  padding: 0.4rem 0.5rem;
+  background: #4a4a54;
+  color: #e8e8f0;
+  border: 1px solid #5a5a66;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
   cursor: pointer;
   text-align: center;
-  transition: background 0.15s, border-color 0.15s;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
 }
 
 .cat-btn:hover {
-  background: #45454e;
-  border-color: #5a5a64;
+  background: #565662;
+  color: #fff;
+  border-color: #6b6b78;
 }
 
 .cat-btn.is-active {
-  background: #4a4a54;
+  background: #5c4a7a;
   border-color: #7c6b9e;
   color: #fff;
 }
