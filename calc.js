@@ -4,13 +4,204 @@
  * Цены заданы в конфиге — их легко менять без правки логики.
  */
 
-// ——— Конфиг цен (удобно расширять: добавить тип услуги или опцию) ———
-var PRICES = {
-  // Цена за единицу: за м² (клининг) или за час (ремонт, фриланс)
-  cleaning: { perUnit: 150, unitLabel: 'м²' },
-  repair:    { perUnit: 800, unitLabel: 'час' },
-  freelance: { perUnit: 1200, unitLabel: 'час' }
-};
+// ——— Список услуг по категориям: категория → массив услуг ———
+// Услуга: { id, name, perUnit, unitLabel } — id для value в select, perUnit — цена за единицу
+var SERVICES = [
+  {
+    name: 'IT-сфера',
+    items: [
+      { id: 'admin', name: 'Администрирование', perUnit: 1200, unitLabel: 'час' },
+      { id: 'data-analysis', name: 'Анализ данных', perUnit: 1200, unitLabel: 'час' },
+      { id: 'webmaster', name: 'Вебмастер', perUnit: 1200, unitLabel: 'час' },
+      { id: 'layout-design', name: 'Верстка и дизайн', perUnit: 1200, unitLabel: 'час' },
+      { id: 'computer-master', name: 'Компьютерный мастер', perUnit: 800, unitLabel: 'час' },
+      { id: 'data-processing', name: 'Обработка данных', perUnit: 1000, unitLabel: 'час' },
+      { id: 'programmer', name: 'Программист', perUnit: 1500, unitLabel: 'час' },
+      { id: 'tech-support', name: 'Техническая поддержка', perUnit: 800, unitLabel: 'час' }
+    ]
+  },
+  {
+    name: 'Авто',
+    items: [
+      { id: 'carwash', name: 'Автомойка', perUnit: 500, unitLabel: 'усл.' },
+      { id: 'autoservice', name: 'Автосервис', perUnit: 1200, unitLabel: 'час' },
+      { id: 'evacuation', name: 'Автоэвакуация и буксировка', perUnit: 2000, unitLabel: 'усл.' },
+      { id: 'driver', name: 'Водитель', perUnit: 600, unitLabel: 'час' },
+      { id: 'cargo-transport', name: 'Перевозка грузов', perUnit: 800, unitLabel: 'час' },
+      { id: 'passenger-transport', name: 'Перевозка пассажиров', perUnit: 600, unitLabel: 'час' }
+    ]
+  },
+  {
+    name: 'Аренда',
+    items: [
+      { id: 'rent-flat', name: 'Аренда квартир', perUnit: 1500, unitLabel: 'сут.' },
+      { id: 'rent-car', name: 'Аренда машин', perUnit: 3000, unitLabel: 'сут.' },
+      { id: 'licenses', name: 'Предоставление лицензий', perUnit: 2000, unitLabel: 'мес.' },
+      { id: 'rental', name: 'Прокат', perUnit: 500, unitLabel: 'час' },
+      { id: 'accommodation', name: 'Услуга по временному проживанию', perUnit: 2000, unitLabel: 'сут.' },
+      { id: 'storage', name: 'Услуга по хранению', perUnit: 200, unitLabel: 'м²/мес.' }
+    ]
+  },
+  {
+    name: 'Дом',
+    items: [
+      { id: 'household', name: 'Бытовые услуги', perUnit: 400, unitLabel: 'час' },
+      { id: 'housekeeping', name: 'Ведение хозяйства', perUnit: 500, unitLabel: 'час' },
+      { id: 'governess', name: 'Гувернантка', perUnit: 800, unitLabel: 'час' },
+      { id: 'delivery', name: 'Доставка', perUnit: 300, unitLabel: 'усл.' },
+      { id: 'nanny', name: 'Няня', perUnit: 600, unitLabel: 'час' },
+      { id: 'cook', name: 'Повар', perUnit: 1000, unitLabel: 'час' },
+      { id: 'caregiver', name: 'Сиделка', perUnit: 500, unitLabel: 'час' },
+      { id: 'social-help', name: 'Социальная помощь', perUnit: 400, unitLabel: 'час' },
+      { id: 'watchman', name: 'Сторож', perUnit: 400, unitLabel: 'час' },
+      { id: 'cleaning', name: 'Уборка и клининг', perUnit: 150, unitLabel: 'м²' },
+      { id: 'dry-clean', name: 'Химчистка', perUnit: 200, unitLabel: 'м²' }
+    ]
+  },
+  {
+    name: 'Животные',
+    items: [
+      { id: 'animal-vaccine', name: 'Вакцинация животных', perUnit: 500, unitLabel: 'усл.' },
+      { id: 'grooming', name: 'Груминг', perUnit: 1500, unitLabel: 'усл.' },
+      { id: 'trainer', name: 'Дрессировщик', perUnit: 800, unitLabel: 'час' },
+      { id: 'cynology', name: 'Кинология', perUnit: 800, unitLabel: 'час' },
+      { id: 'animal-boarding', name: 'Передержка животных', perUnit: 500, unitLabel: 'сут.' },
+      { id: 'animal-care', name: 'Уход за животными', perUnit: 400, unitLabel: 'час' }
+    ]
+  },
+  {
+    name: 'Здоровье',
+    items: [
+      { id: 'dietitian', name: 'Диетолог', perUnit: 1500, unitLabel: 'час' },
+      { id: 'health-consulting', name: 'Консультирование', perUnit: 1200, unitLabel: 'час' },
+      { id: 'speech-therapist', name: 'Логопед', perUnit: 1000, unitLabel: 'час' },
+      { id: 'masseur', name: 'Массажист', perUnit: 1500, unitLabel: 'час' },
+      { id: 'psychologist', name: 'Психолог', perUnit: 2000, unitLabel: 'час' },
+      { id: 'health-coach', name: 'Тренер, инструктор', perUnit: 1200, unitLabel: 'час' }
+    ]
+  },
+  {
+    name: 'Информационные услуги',
+    items: [
+      { id: 'research', name: 'Исследования', perUnit: 1500, unitLabel: 'час' },
+      { id: 'marketing', name: 'Маркетинг, реклама', perUnit: 1200, unitLabel: 'час' },
+      { id: 'ritual', name: 'Обрядовые услуги', perUnit: 5000, unitLabel: 'усл.' },
+      { id: 'surveys', name: 'Опросы, сбор мнений', perUnit: 800, unitLabel: 'час' },
+      { id: 'translator', name: 'Переводчик', perUnit: 1000, unitLabel: 'час' }
+    ]
+  },
+  {
+    name: 'Красота',
+    items: [
+      { id: 'beauty-consulting', name: 'Консультирование', perUnit: 800, unitLabel: 'час' },
+      { id: 'cosmetologist', name: 'Косметолог', perUnit: 1500, unitLabel: 'усл.' },
+      { id: 'manicure', name: 'Маникюр, педикюр', perUnit: 800, unitLabel: 'усл.' },
+      { id: 'model', name: 'Модель', perUnit: 3000, unitLabel: 'час' },
+      { id: 'hairdresser', name: 'Парикмахер', perUnit: 800, unitLabel: 'усл.' },
+      { id: 'stylist', name: 'Стилист', perUnit: 1200, unitLabel: 'час' },
+      { id: 'tattoo', name: 'Тату и пирсинг', perUnit: 2000, unitLabel: 'час' },
+      { id: 'epilation', name: 'Эпиляция', perUnit: 1000, unitLabel: 'усл.' }
+    ]
+  },
+  {
+    name: 'Обучение',
+    items: [
+      { id: 'tutor', name: 'Репетитор', perUnit: 1000, unitLabel: 'час' },
+      { id: 'teacher', name: 'Учитель', perUnit: 800, unitLabel: 'час' }
+    ]
+  },
+  {
+    name: 'Общественное питание',
+    items: [
+      { id: 'confectioner', name: 'Кондитер', perUnit: 1000, unitLabel: 'час' },
+      { id: 'catering', name: 'Обслуживание', perUnit: 500, unitLabel: 'час' },
+      { id: 'cook-catering', name: 'Повар', perUnit: 1000, unitLabel: 'час' }
+    ]
+  },
+  {
+    name: 'Одежда',
+    items: [
+      { id: 'fashion-designer', name: 'Модельер, дизайнер', perUnit: 1500, unitLabel: 'час' },
+      { id: 'tailoring', name: 'Пошив', perUnit: 800, unitLabel: 'усл.' },
+      { id: 'sewing', name: 'Ткани, кройка, шитьё', perUnit: 600, unitLabel: 'час' }
+    ]
+  },
+  {
+    name: 'Природа',
+    items: [
+      { id: 'landscaping', name: 'Благоустройство территории', perUnit: 500, unitLabel: 'м²' },
+      { id: 'animal-husbandry', name: 'Животноводство', perUnit: 600, unitLabel: 'час' },
+      { id: 'forest-hunting', name: 'Лес, охота, рыбалка', perUnit: 2000, unitLabel: 'усл.' },
+      { id: 'waste-processing', name: 'Переработка отходов', perUnit: 300, unitLabel: 'т' },
+      { id: 'scrap-metal', name: 'Приём или сдача лома', perUnit: 30, unitLabel: 'кг' },
+      { id: 'agriculture', name: 'Сельхоз услуги', perUnit: 500, unitLabel: 'час' }
+    ]
+  },
+  {
+    name: 'Прочее',
+    items: [
+      { id: 'loader', name: 'Грузчик', perUnit: 400, unitLabel: 'час' },
+      { id: 'copywriter', name: 'Копирайтер', perUnit: 800, unitLabel: 'час' },
+      { id: 'porter', name: 'Носильщик', perUnit: 300, unitLabel: 'усл.' },
+      { id: 'security', name: 'Обеспечение безопасности', perUnit: 600, unitLabel: 'час' },
+      { id: 'writer', name: 'Писатель', perUnit: 1000, unitLabel: 'час' },
+      { id: 'paid-toilets', name: 'Платные туалеты', perUnit: 50, unitLabel: 'усл.' },
+      { id: 'entertainment', name: 'Развлечения', perUnit: 2000, unitLabel: 'час' }
+    ]
+  },
+  {
+    name: 'Развлечения',
+    items: [
+      { id: 'animator', name: 'Аниматор', perUnit: 1500, unitLabel: 'час' },
+      { id: 'artist', name: 'Артист, певец, музыкант', perUnit: 3000, unitLabel: 'час' },
+      { id: 'host', name: 'Ведущий, шоумен, тамада', perUnit: 5000, unitLabel: 'усл.' },
+      { id: 'guide', name: 'Гид, экскурсовод', perUnit: 1500, unitLabel: 'час' }
+    ]
+  },
+  {
+    name: 'Ремонт',
+    items: [
+      { id: 'household-repair', name: 'Бытовой ремонт', perUnit: 800, unitLabel: 'час' },
+      { id: 'design', name: 'Дизайн', perUnit: 1200, unitLabel: 'час' },
+      { id: 'finishing', name: 'Отделка', perUnit: 600, unitLabel: 'м²' },
+      { id: 'appliance-repair', name: 'Ремонт бытовой техники', perUnit: 800, unitLabel: 'час' },
+      { id: 'apartment-repair', name: 'Ремонт квартир', perUnit: 1000, unitLabel: 'м²' },
+      { id: 'restoration', name: 'Реставрация', perUnit: 1500, unitLabel: 'час' },
+      { id: 'plumber', name: 'Сантехник', perUnit: 1000, unitLabel: 'час' },
+      { id: 'construction', name: 'Строительство', perUnit: 800, unitLabel: 'м²' },
+      { id: 'maintenance', name: 'Техобслуживание', perUnit: 600, unitLabel: 'час' },
+      { id: 'electrician', name: 'Электрик', perUnit: 900, unitLabel: 'час' }
+    ]
+  },
+  {
+    name: 'Сделай сам',
+    items: [
+      { id: 'blacksmith', name: 'Кузнец', perUnit: 1500, unitLabel: 'час' },
+      { id: 'metalwork', name: 'Металлообработка', perUnit: 800, unitLabel: 'час' },
+      { id: 'engineering', name: 'Проектирование', perUnit: 1500, unitLabel: 'час' },
+      { id: 'production', name: 'Производственные услуги', perUnit: 600, unitLabel: 'час' },
+      { id: 'carpenter', name: 'Столяр, плотник', perUnit: 1000, unitLabel: 'час' },
+      { id: 'assembly', name: 'Услуги по сборке', perUnit: 500, unitLabel: 'час' }
+    ]
+  },
+  {
+    name: 'Спорт',
+    items: [
+      { id: 'sport-consulting', name: 'Консультирование', perUnit: 1000, unitLabel: 'час' },
+      { id: 'sport-masseur', name: 'Массажист', perUnit: 1500, unitLabel: 'час' },
+      { id: 'sport-trainer', name: 'Тренер, инструктор', perUnit: 1200, unitLabel: 'час' }
+    ]
+  }
+];
+
+// Объект PRICES: id услуги → { perUnit, unitLabel } — нужен для быстрого поиска цены при расчёте
+var PRICES = {};
+// Заполняем PRICES из SERVICES: каждому id услуги сопоставляем цену и единицу измерения
+SERVICES.forEach(function (cat) {
+  cat.items.forEach(function (item) {
+    PRICES[item.id] = { perUnit: item.perUnit, unitLabel: item.unitLabel };
+  });
+});
 
 // Доп. коэффициенты и фикс. суммы
 var URGENT_PERCENT = 20;   // надбавка за срочность, %
@@ -18,37 +209,51 @@ var VISIT_FEE = 500;      // доп. плата за выезд (для клин
 
 // ——— Ссылки на элементы страницы (получаем один раз при загрузке) ———
 var formEl = document.getElementById('calc-form');
-var serviceTypeGroupEl = document.getElementById('service-type-group');
+var categorySelectEl = document.getElementById('category-select');
+var serviceSelectEl = document.getElementById('service-select');
 var volumeEl = document.getElementById('volume');
 var volumeLabelEl = document.getElementById('volume-label');
 var extraOptionEl = document.getElementById('extra-option');
 var resultBlock = document.getElementById('result');
 var resultPriceEl = document.getElementById('result-price');
 
-/** Возвращает значение выбранного типа услуги (кнопки-radio). */
+// Услуги, для которых не применим выезд (удалённая работа)
+var NO_VISIT_SERVICES = ['admin', 'data-analysis', 'webmaster', 'layout-design', 'data-processing', 'programmer', 'tech-support', 'copywriter', 'writer', 'research', 'marketing', 'surveys', 'translator'];
+
+/** Возвращает id выбранной услуги. */
 function getServiceType() {
-  var checked = serviceTypeGroupEl.querySelector('input:checked');
-  return checked ? checked.value : 'cleaning';
+  return serviceSelectEl ? serviceSelectEl.value : (SERVICES[0].items[0].id);
+}
+
+/** Возвращает конфиг выбранной услуги (perUnit, unitLabel). */
+function getServiceConfig() {
+  var id = getServiceType();
+  return PRICES[id] || PRICES['cleaning'];
 }
 
 /**
- * Обновляет подпись поля «Объём» в зависимости от типа услуги:
- * клининг — «Площадь, м²», ремонт/фриланс — «Часы».
+ * Обновляет подпись поля «Объём» по unitLabel выбранной услуги
+ * (например: «Площадь, м²», «Часы», «Количество, усл.» и т.д.).
  */
 function updateVolumeLabel() {
-  var type = getServiceType();
-  volumeLabelEl.textContent = type === 'cleaning' ? 'Площадь, м²' : 'Часы';
+  var cfg = getServiceConfig();
+  if (!cfg || !volumeLabelEl) return;
+  var label = cfg.unitLabel;
+  if (label === 'м²') volumeLabelEl.textContent = 'Площадь, м²';
+  else if (label === 'час') volumeLabelEl.textContent = 'Часы';
+  else volumeLabelEl.textContent = 'Количество, ' + label;
 }
 
 /**
- * Для фриланса опции «Выезд» и «Срочный + Выезд» недоступны; при переключении на фриланс сбрасываем их выбор.
+ * Для удалённых услуг (IT, копирайтинг и т.п.) опции «Выезд» и «Срочный + Выезд» недоступны.
  */
 function updateExtraOptions() {
-  var type = getServiceType();
+  var id = getServiceType();
   var optVisit = extraOptionEl.querySelector('option[value="visit"]');
   var optBoth = extraOptionEl.querySelector('option[value="both"]');
+  var noVisit = NO_VISIT_SERVICES.indexOf(id) !== -1;
 
-  if (type === 'freelance') {
+  if (noVisit) {
     optVisit.disabled = true;
     optBoth.disabled = true;
     if (extraOptionEl.value === 'visit' || extraOptionEl.value === 'both') {
@@ -58,6 +263,39 @@ function updateExtraOptions() {
     optVisit.disabled = false;
     optBoth.disabled = false;
   }
+}
+
+/**
+ * Строит выпадающий список категорий (IT-сфера, Авто, Дом и т.д.).
+ */
+function buildCategorySelect() {
+  if (!categorySelectEl) return;
+  categorySelectEl.innerHTML = '';
+  SERVICES.forEach(function (cat, idx) {
+    var opt = document.createElement('option');
+    opt.value = idx;
+    opt.textContent = cat.name;
+    categorySelectEl.appendChild(opt);
+  });
+}
+
+/**
+ * Строит выпадающий список услуг только для выбранной категории.
+ */
+function buildServiceSelect() {
+  if (!serviceSelectEl || !categorySelectEl) return;
+  var catIndex = parseInt(categorySelectEl.value, 10);
+  var cat = SERVICES[catIndex] || SERVICES[0];
+  serviceSelectEl.innerHTML = '';
+  cat.items.forEach(function (item) {
+    var opt = document.createElement('option');
+    opt.value = item.id;
+    opt.textContent = item.name;
+    serviceSelectEl.appendChild(opt);
+  });
+  // Обновляем подпись объёма и опции после смены услуг
+  updateVolumeLabel();
+  updateExtraOptions();
 }
 
 /** Максимально допустимый объём (защита от нереалистичных значений). */
@@ -105,11 +343,10 @@ function validateInput() {
  * @returns {number} сумма в рублях
  */
 function calculate() {
-  var type = getServiceType();
   var volume = Number(volumeEl.value) || 0;
   var extra = extraOptionEl.value;
 
-  var cfg = PRICES[type];
+  var cfg = getServiceConfig();
   if (!cfg || volume <= 0) return 0;
 
   // Базовая сумма: цена за единицу × объём
@@ -148,8 +385,13 @@ function showError(message) {
   resultBlock.hidden = false;
 }
 
-// ——— При смене типа услуги: подпись «Объём» и доступность опций «Выезд» / «Срочный + Выезд» ———
-serviceTypeGroupEl.addEventListener('change', function () {
+// ——— При смене категории: обновляем список услуг ———
+categorySelectEl.addEventListener('change', function () {
+  buildServiceSelect();
+});
+
+// ——— При смене услуги: подпись «Объём» и доступность опций «Выезд» / «Срочный + Выезд» ———
+serviceSelectEl.addEventListener('change', function () {
   updateVolumeLabel();
   updateExtraOptions();
 });
@@ -166,6 +408,9 @@ formEl.addEventListener('submit', function (e) {
   showResult(price);
 });
 
-// Подставляем подпись и доступность доп. опций при первой загрузке страницы
+// Строим выпадающие списки: сначала категории, затем услуги выбранной категории
+buildCategorySelect();
+buildServiceSelect();
+// Подставляем подпись и доступность доп. опций при первой загрузке
 updateVolumeLabel();
 updateExtraOptions();

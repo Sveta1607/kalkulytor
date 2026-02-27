@@ -15,7 +15,7 @@ body {
 
 /* Центрированный блок калькулятора, тёмный фон и тень */
 .container {
-  max-width: 420px;
+  max-width: 480px;
   margin: 0 auto;
   background: #2d2d33;
   padding: 2rem;
@@ -61,45 +61,26 @@ h1 {
   margin-bottom: 1rem;
 }
 
-/* Кнопки выбора типа услуги: скрытые radio, label выглядят как кнопки */
-.service-type-buttons {
+/* Ряд выпадающих списков — одинаковый размер «кнопок» (select) */
+.select-row {
   display: flex;
-  gap: 0.5rem;
+  gap: 1rem;
   margin-bottom: 1rem;
   flex-wrap: wrap;
 }
 
-.service-type-buttons input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.service-type-buttons label {
+/* Оба select-label занимают равную ширину — кнопки одинакового размера */
+.select-row .select-label {
   flex: 1;
-  min-width: 80px;
-  padding: 0.6rem 0.75rem;
-  background: #3d3d45;
-  color: #c8c8d0;
-  border: 1px solid #4a4a54;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  text-align: center;
-  cursor: pointer;
+  min-width: 180px;
   margin-bottom: 0;
-  transition: background 0.15s, border-color 0.15s;
 }
 
-.service-type-buttons label:hover {
-  background: #45454e;
-}
-
-.service-type-buttons input:checked + label {
-  background: #4a4a54;
-  border-color: #6b6b78;
-  color: #fff;
+/* Класс для select: одинаковая высота и box-sizing — одинаковый размер кнопок списка */
+.select-equal {
+  width: 100%;
+  min-height: 2.7rem;
+  box-sizing: border-box;
 }
 
 /* Поля ввода и выпадающий список под тёмную тему */
@@ -123,6 +104,13 @@ h1 {
 .form select option {
   background: #3d3d45;
   color: #e8e8e8;
+}
+
+/* Группы услуг (optgroup) — выделение категорий в выпадающем списке */
+.form select optgroup {
+  font-weight: 600;
+  color: #a0a0a8;
+  background: #2d2d33;
 }
 
 /* Кнопка «Рассчитать цену» — тёмно-фиолетовая */
