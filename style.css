@@ -13,9 +13,9 @@ body {
   min-height: 100vh;
 }
 
-/* Центрированный блок калькулятора, тёмный фон и тень */
+/* Центрированный блок калькулятора, тёмный фон и тень — увеличен для 17 кнопок */
 .container {
-  max-width: 480px;
+  max-width: 680px;
   margin: 0 auto;
   background: #2d2d33;
   padding: 2rem;
@@ -61,26 +61,95 @@ h1 {
   margin-bottom: 1rem;
 }
 
-/* Ряд выпадающих списков — одинаковый размер «кнопок» (select) */
-.select-row {
-  display: flex;
-  gap: 1rem;
+/* Сетка 17 кнопок категорий — одинаковый размер каждой кнопки */
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 600px) {
+  .categories-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Кнопка категории: одинаковые размеры */
+.cat-btn {
+  min-height: 2.5rem;
+  padding: 0.5rem 0.6rem;
+  background: #3d3d45;
+  color: #c8c8d0;
+  border: 1px solid #4a4a54;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.cat-btn:hover {
+  background: #45454e;
+  border-color: #5a5a64;
+}
+
+.cat-btn.is-active {
+  background: #4a4a54;
+  border-color: #7c6b9e;
+  color: #fff;
+}
+
+/* Выпадающий список услуг — под выбранной кнопкой */
+.services-dropdown {
+  position: absolute;
+  z-index: 100;
+  min-width: 220px;
+  max-height: 280px;
+  overflow-y: auto;
+  background: #2d2d33;
+  border: 1px solid #4a4a54;
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
   margin-bottom: 1rem;
-  flex-wrap: wrap;
 }
 
-/* Оба select-label занимают равную ширину — кнопки одинакового размера */
-.select-row .select-label {
-  flex: 1;
-  min-width: 180px;
-  margin-bottom: 0;
+.services-list {
+  list-style: none;
+  padding: 0.25rem 0;
+  margin: 0;
 }
 
-/* Класс для select: одинаковая высота и box-sizing — одинаковый размер кнопок списка */
-.select-equal {
-  width: 100%;
-  min-height: 2.7rem;
-  box-sizing: border-box;
+.services-list li {
+  padding: 0.5rem 1rem;
+  color: #c8c8d0;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.services-list li:hover {
+  background: #3d3d45;
+  color: #fff;
+}
+
+/* Обёртка для позиционирования dropdown — relative контейнер */
+.categories-wrapper {
+  position: relative;
+  margin-bottom: 0.5rem;
+}
+
+/* Отображение выбранной услуги */
+.selected-service-display {
+  margin-bottom: 1rem;
+  padding: 0.5rem 0.75rem;
+  background: #3d3d45;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #a0a0a8;
+}
+
+.selected-service-display.has-service {
+  color: #e8e8e8;
 }
 
 /* Поля ввода и выпадающий список под тёмную тему */

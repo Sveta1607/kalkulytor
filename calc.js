@@ -209,8 +209,12 @@ var VISIT_FEE = 500;      // доп. плата за выезд (для клин
 
 // ——— Ссылки на элементы страницы (получаем один раз при загрузке) ———
 var formEl = document.getElementById('calc-form');
-var categorySelectEl = document.getElementById('category-select');
-var serviceSelectEl = document.getElementById('service-select');
+var categoriesGridEl = document.getElementById('categories-grid');
+var categoriesWrapperEl = document.getElementById('categories-wrapper');
+var servicesDropdownEl = document.getElementById('services-dropdown');
+var servicesListEl = document.getElementById('services-list');
+var selectedServiceDisplayEl = document.getElementById('selected-service-display');
+var selectedServiceIdEl = document.getElementById('selected-service-id');
 var volumeEl = document.getElementById('volume');
 var volumeLabelEl = document.getElementById('volume-label');
 var extraOptionEl = document.getElementById('extra-option');
@@ -220,9 +224,10 @@ var resultPriceEl = document.getElementById('result-price');
 // Услуги, для которых не применим выезд (удалённая работа)
 var NO_VISIT_SERVICES = ['admin', 'data-analysis', 'webmaster', 'layout-design', 'data-processing', 'programmer', 'tech-support', 'copywriter', 'writer', 'research', 'marketing', 'surveys', 'translator'];
 
-/** Возвращает id выбранной услуги. */
+/** Возвращает id выбранной услуги из скрытого поля. */
 function getServiceType() {
-  return serviceSelectEl ? serviceSelectEl.value : (SERVICES[0].items[0].id);
+  var id = selectedServiceIdEl ? selectedServiceIdEl.value : '';
+  return id || (SERVICES[0].items[0].id);
 }
 
 /** Возвращает конфиг выбранной услуги (perUnit, unitLabel). */
@@ -266,37 +271,82 @@ function updateExtraOptions() {
 }
 
 /**
- * Строит выпадающий список категорий (IT-сфера, Авто, Дом и т.д.).
+ * Строит 17 кнопок категорий — одинакового размера в сетке.
  */
-function buildCategorySelect() {
-  if (!categorySelectEl) return;
-  categorySelectEl.innerHTML = '';
-  SERVICES.forEach(function (cat, idx) {
-    var opt = document.createElement('option');
-    opt.value = idx;
-    opt.textContent = cat.name;
-    categorySelectEl.appendChild(opt);
+function buildCategoriesGrid() {
+  if (!categoriesGridEl) return;
+  categoriesGridEl.innerHTML = '';
+  SERVICES.forEach(function (cat, catIndex) {
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'cat-btn';
+    btn.textContent = cat.name;
+    btn.dataset.categoryIndex = catIndex;
+    btn.addEventListener('click', function () { openServicesDropdown(btn, catIndex); });
+    categoriesGridEl.appendChild(btn);
   });
 }
 
 /**
- * Строит выпадающий список услуг только для выбранной категории.
+ * Открывает выпадающий список услуг под нажатой кнопкой категории.
  */
-function buildServiceSelect() {
-  if (!serviceSelectEl || !categorySelectEl) return;
-  var catIndex = parseInt(categorySelectEl.value, 10);
-  var cat = SERVICES[catIndex] || SERVICES[0];
-  serviceSelectEl.innerHTML = '';
+function openServicesDropdown(btn, catIndex) {
+  var cat = SERVICES[catIndex];
+  if (!cat || !servicesListEl || !servicesDropdownEl) return;
+
+  // Снимаем активное состояние с остальных кнопок
+  categoriesGridEl.querySelectorAll('.cat-btn').forEach(function (b) { b.classList.remove('is-active'); });
+  btn.classList.add('is-active');
+
+  // Заполняем список услуг
+  servicesListEl.innerHTML = '';
   cat.items.forEach(function (item) {
-    var opt = document.createElement('option');
-    opt.value = item.id;
-    opt.textContent = item.name;
-    serviceSelectEl.appendChild(opt);
+    var li = document.createElement('li');
+    li.textContent = item.name;
+    li.dataset.serviceId = item.id;
+    li.addEventListener('click', function () { selectService(item.id, item.name); });
+    servicesListEl.appendChild(li);
   });
-  // Обновляем подпись объёма и опции после смены услуг
+
+  // Позиционируем dropdown под кнопкой (относительно wrapper)
+  var wrapperRect = categoriesWrapperEl.getBoundingClientRect();
+  var btnRect = btn.getBoundingClientRect();
+  servicesDropdownEl.style.left = (btnRect.left - wrapperRect.left) + 'px';
+  servicesDropdownEl.style.top = (btnRect.bottom - wrapperRect.top + 4) + 'px';
+  servicesDropdownEl.hidden = false;
+}
+
+/**
+ * Выбор услуги: сохраняем id, обновляем отображение, закрываем dropdown.
+ */
+function selectService(serviceId, serviceName) {
+  if (selectedServiceIdEl) selectedServiceIdEl.value = serviceId;
+  if (selectedServiceDisplayEl) {
+    selectedServiceDisplayEl.textContent = 'Выбрано: ' + serviceName;
+    selectedServiceDisplayEl.classList.add('has-service');
+    selectedServiceDisplayEl.hidden = false;
+  }
+  closeServicesDropdown();
   updateVolumeLabel();
   updateExtraOptions();
 }
+
+/** Закрывает выпадающий список услуг. */
+function closeServicesDropdown() {
+  if (servicesDropdownEl) servicesDropdownEl.hidden = true;
+  categoriesGridEl.querySelectorAll('.cat-btn').forEach(function (b) { b.classList.remove('is-active'); });
+}
+
+/**
+ * Обработка клика вне dropdown — закрытие списка.
+ */
+// Клик вне области категорий и выпадающего списка — закрываем dropdown
+document.addEventListener('click', function (e) {
+  if (!servicesDropdownEl || servicesDropdownEl.hidden) return;
+  if (!categoriesWrapperEl || !categoriesWrapperEl.contains(e.target)) {
+    closeServicesDropdown();
+  }
+});
 
 /** Максимально допустимый объём (защита от нереалистичных значений). */
 var MAX_VOLUME = 100000;
@@ -306,6 +356,11 @@ var MAX_VOLUME = 100000;
  * @returns {string|null}
  */
 function validateInput() {
+  // 0. Не выбрана услуга
+  if (!selectedServiceIdEl || !selectedServiceIdEl.value) {
+    return 'Выберите категорию и услугу.';
+  }
+
   var raw = (volumeEl.value || '').trim();
 
   // 1. Пустое поле объёма
@@ -385,17 +440,6 @@ function showError(message) {
   resultBlock.hidden = false;
 }
 
-// ——— При смене категории: обновляем список услуг ———
-categorySelectEl.addEventListener('change', function () {
-  buildServiceSelect();
-});
-
-// ——— При смене услуги: подпись «Объём» и доступность опций «Выезд» / «Срочный + Выезд» ———
-serviceSelectEl.addEventListener('change', function () {
-  updateVolumeLabel();
-  updateExtraOptions();
-});
-
 // ——— При отправке формы: сначала проверка крайних случаев, затем расчёт ———
 formEl.addEventListener('submit', function (e) {
   e.preventDefault();
@@ -408,9 +452,16 @@ formEl.addEventListener('submit', function (e) {
   showResult(price);
 });
 
-// Строим выпадающие списки: сначала категории, затем услуги выбранной категории
-buildCategorySelect();
-buildServiceSelect();
-// Подставляем подпись и доступность доп. опций при первой загрузке
+// Строим 17 кнопок категорий при загрузке страницы
+buildCategoriesGrid();
+// Устанавливаем услугу по умолчанию (первая в первой категории)
+if (selectedServiceIdEl && SERVICES[0].items[0]) {
+  selectedServiceIdEl.value = SERVICES[0].items[0].id;
+  if (selectedServiceDisplayEl) {
+    selectedServiceDisplayEl.textContent = 'Выбрано: ' + SERVICES[0].items[0].name;
+    selectedServiceDisplayEl.classList.add('has-service');
+    selectedServiceDisplayEl.hidden = false;
+  }
+}
 updateVolumeLabel();
 updateExtraOptions();
