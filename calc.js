@@ -4,7 +4,9 @@
  * Цены заданы в конфиге — их легко менять без правки логики.
  */
 
-// ——— Список услуг по категориям: категория → массив услуг ———
+// ═══════════════════════════════════════════════════════════════
+// ДАННЫЕ: список услуг по категориям
+// ═══════════════════════════════════════════════════════════════
 // Услуга: { id, name, perUnit, unitLabel } — id для value в select, perUnit — цена за единицу
 var SERVICES = [
   {
@@ -194,20 +196,33 @@ var SERVICES = [
   }
 ];
 
-// Объект PRICES: id услуги → { perUnit, unitLabel } — нужен для быстрого поиска цены при расчёте
-var PRICES = {};
-// Заполняем PRICES из SERVICES: каждому id услуги сопоставляем цену и единицу измерения
-SERVICES.forEach(function (cat) {
-  cat.items.forEach(function (item) {
-    PRICES[item.id] = { perUnit: item.perUnit, unitLabel: item.unitLabel };
+/** Строит объект PRICES из SERVICES: id услуги → { perUnit, unitLabel }. */
+function buildPrices() {
+  var prices = {};
+  SERVICES.forEach(function (cat) {
+    cat.items.forEach(function (item) {
+      prices[item.id] = { perUnit: item.perUnit, unitLabel: item.unitLabel };
+    });
   });
-});
+  return prices;
+}
 
-// Доп. коэффициенты и фикс. суммы
-var URGENT_PERCENT = 20;   // надбавка за срочность, %
-var VISIT_FEE = 500;      // доп. плата за выезд (для клининга/ремонта логично; для фриланса можно 0 или убрать опцию)
+var PRICES = buildPrices();
 
-// ——— Ссылки на элементы страницы (получаем один раз при загрузке) ———
+// ═══════════════════════════════════════════════════════════════
+// КОНФИГ: коэффициенты и ограничения
+// ═══════════════════════════════════════════════════════════════
+var CONFIG = {
+  urgentPercent: 20,
+  visitFee: 500,
+  maxVolume: 100000
+};
+
+var NO_VISIT_SERVICES = ['admin', 'data-analysis', 'webmaster', 'layout-design', 'data-processing', 'programmer', 'tech-support', 'copywriter', 'writer', 'research', 'marketing', 'surveys', 'translator'];
+
+// ═══════════════════════════════════════════════════════════════
+// DOM: ссылки на элементы страницы (получаем один раз при загрузке)
+// ═══════════════════════════════════════════════════════════════
 var formEl = document.getElementById('calc-form');
 var categoriesGridEl = document.getElementById('categories-grid');
 var categoriesWrapperEl = document.getElementById('categories-wrapper');
@@ -221,8 +236,9 @@ var extraOptionEl = document.getElementById('extra-option');
 var resultBlock = document.getElementById('result');
 var resultPriceEl = document.getElementById('result-price');
 
-// Услуги, для которых не применим выезд (удалённая работа)
-var NO_VISIT_SERVICES = ['admin', 'data-analysis', 'webmaster', 'layout-design', 'data-processing', 'programmer', 'tech-support', 'copywriter', 'writer', 'research', 'marketing', 'surveys', 'translator'];
+// ═══════════════════════════════════════════════════════════════
+// ЛОГИКА: получение данных и расчёт
+// ═══════════════════════════════════════════════════════════════
 
 /** Возвращает id выбранной услуги из скрытого поля. */
 function getServiceType() {
@@ -254,19 +270,19 @@ function updateVolumeLabel() {
  */
 function updateExtraOptions() {
   var id = getServiceType();
-  var optVisit = extraOptionEl.querySelector('option[value="visit"]');
-  var optBoth = extraOptionEl.querySelector('option[value="both"]');
+  var optVisit = extraOptionEl && extraOptionEl.querySelector('option[value="visit"]');
+  var optBoth = extraOptionEl && extraOptionEl.querySelector('option[value="both"]');
   var noVisit = NO_VISIT_SERVICES.indexOf(id) !== -1;
 
   if (noVisit) {
-    optVisit.disabled = true;
-    optBoth.disabled = true;
-    if (extraOptionEl.value === 'visit' || extraOptionEl.value === 'both') {
+    if (optVisit) optVisit.disabled = true;
+    if (optBoth) optBoth.disabled = true;
+    if (extraOptionEl && (extraOptionEl.value === 'visit' || extraOptionEl.value === 'both')) {
       extraOptionEl.value = '';
     }
   } else {
-    optVisit.disabled = false;
-    optBoth.disabled = false;
+    if (optVisit) optVisit.disabled = false;
+    if (optBoth) optBoth.disabled = false;
   }
 }
 
@@ -338,20 +354,6 @@ function closeServicesDropdown() {
 }
 
 /**
- * Обработка клика вне dropdown — закрытие списка.
- */
-// Клик вне области категорий и выпадающего списка — закрываем dropdown
-document.addEventListener('click', function (e) {
-  if (!servicesDropdownEl || servicesDropdownEl.hidden) return;
-  if (!categoriesWrapperEl || !categoriesWrapperEl.contains(e.target)) {
-    closeServicesDropdown();
-  }
-});
-
-/** Максимально допустимый объём (защита от нереалистичных значений). */
-var MAX_VOLUME = 100000;
-
-/**
  * Проверка крайних случаев ввода. Возвращает строку ошибки или null, если всё ок.
  * @returns {string|null}
  */
@@ -386,8 +388,8 @@ function validateInput() {
   }
 
   // 5. Слишком большое число (переполнение / опечатка)
-  if (volume > MAX_VOLUME) {
-    return 'Укажите объём не больше ' + MAX_VOLUME + '.';
+  if (volume > CONFIG.maxVolume) {
+    return 'Укажите объём не больше ' + CONFIG.maxVolume + '.';
   }
 
   return null;
@@ -409,12 +411,12 @@ function calculate() {
 
   // Надбавка за срочность (если выбрано в выпадающем списке)
   if (extra === 'urgent' || extra === 'both') {
-    total = total * (1 + URGENT_PERCENT / 100);
+    total = total * (1 + CONFIG.urgentPercent / 100);
   }
 
   // Фиксированная доплата за выезд (если выбрано в выпадающем списке)
   if (extra === 'visit' || extra === 'both') {
-    total = total + VISIT_FEE;
+    total = total + CONFIG.visitFee;
   }
 
   return Math.round(total);
@@ -440,7 +442,9 @@ function showError(message) {
   resultBlock.hidden = false;
 }
 
-// ——— При отправке формы: сначала проверка крайних случаев, затем расчёт ———
+// ═══════════════════════════════════════════════════════════════
+// СОБЫТИЯ
+// ═══════════════════════════════════════════════════════════════
 formEl.addEventListener('submit', function (e) {
   e.preventDefault();
   var error = validateInput();
@@ -452,16 +456,30 @@ formEl.addEventListener('submit', function (e) {
   showResult(price);
 });
 
-// Строим 17 кнопок категорий при загрузке страницы
-buildCategoriesGrid();
-// Устанавливаем услугу по умолчанию (первая в первой категории)
-if (selectedServiceIdEl && SERVICES[0].items[0]) {
-  selectedServiceIdEl.value = SERVICES[0].items[0].id;
-  if (selectedServiceDisplayEl) {
-    selectedServiceDisplayEl.textContent = 'Выбрано: ' + SERVICES[0].items[0].name;
-    selectedServiceDisplayEl.classList.add('has-service');
-    selectedServiceDisplayEl.hidden = false;
+// Клик вне категорий и dropdown — закрываем список услуг
+document.addEventListener('click', function (e) {
+  if (!servicesDropdownEl || servicesDropdownEl.hidden) return;
+  if (!categoriesWrapperEl || !categoriesWrapperEl.contains(e.target)) {
+    closeServicesDropdown();
   }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// ЗАПУСК
+// ═══════════════════════════════════════════════════════════════
+function init() {
+  buildCategoriesGrid();
+  if (selectedServiceIdEl && SERVICES[0] && SERVICES[0].items[0]) {
+    var first = SERVICES[0].items[0];
+    selectedServiceIdEl.value = first.id;
+    if (selectedServiceDisplayEl) {
+      selectedServiceDisplayEl.textContent = 'Выбрано: ' + first.name;
+      selectedServiceDisplayEl.classList.add('has-service');
+      selectedServiceDisplayEl.hidden = false;
+    }
+  }
+  updateVolumeLabel();
+  updateExtraOptions();
 }
-updateVolumeLabel();
-updateExtraOptions();
+
+init();
