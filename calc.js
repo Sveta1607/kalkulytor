@@ -230,6 +230,10 @@ var servicesDropdownEl = document.getElementById('services-dropdown');
 var servicesListEl = document.getElementById('services-list');
 var selectedServiceDisplayEl = document.getElementById('selected-service-display');
 var selectedServiceIdEl = document.getElementById('selected-service-id');
+var serviceSearchEl = document.getElementById('service-search');
+var serviceSearchWrapperEl = document.getElementById('service-search-wrapper');
+var searchAutocompleteEl = document.getElementById('search-autocomplete');
+var searchAutocompleteListEl = document.getElementById('search-autocomplete-list');
 var volumeEl = document.getElementById('volume');
 var volumeLabelEl = document.getElementById('volume-label');
 var extraOptionEl = document.getElementById('extra-option');
@@ -243,7 +247,7 @@ var resultPriceEl = document.getElementById('result-price');
 /** Возвращает id выбранной услуги из скрытого поля. */
 function getServiceType() {
   var id = selectedServiceIdEl ? selectedServiceIdEl.value : '';
-  return id || (SERVICES[0].items[0].id);
+  return id || (SERVICES[0] && SERVICES[0].items[0] ? SERVICES[0].items[0].id : '');
 }
 
 /** Возвращает конфиг выбранной услуги (perUnit, unitLabel). */
@@ -310,11 +314,10 @@ function openServicesDropdown(btn, catIndex) {
   var cat = SERVICES[catIndex];
   if (!cat || !servicesListEl || !servicesDropdownEl) return;
 
-  // Снимаем активное состояние с остальных кнопок
+  closeSearchAutocomplete();
   categoriesGridEl.querySelectorAll('.cat-btn').forEach(function (b) { b.classList.remove('is-active'); });
   btn.classList.add('is-active');
 
-  // Заполняем список услуг
   servicesListEl.innerHTML = '';
   cat.items.forEach(function (item) {
     var li = document.createElement('li');
@@ -324,7 +327,6 @@ function openServicesDropdown(btn, catIndex) {
     servicesListEl.appendChild(li);
   });
 
-  // Позиционируем dropdown под кнопкой (относительно wrapper)
   var wrapperRect = categoriesWrapperEl.getBoundingClientRect();
   var btnRect = btn.getBoundingClientRect();
   servicesDropdownEl.style.left = (btnRect.left - wrapperRect.left) + 'px';
@@ -343,6 +345,7 @@ function selectService(serviceId, serviceName) {
     selectedServiceDisplayEl.hidden = false;
   }
   closeServicesDropdown();
+  closeSearchAutocomplete();
   updateVolumeLabel();
   updateExtraOptions();
 }
@@ -351,6 +354,47 @@ function selectService(serviceId, serviceName) {
 function closeServicesDropdown() {
   if (servicesDropdownEl) servicesDropdownEl.hidden = true;
   categoriesGridEl.querySelectorAll('.cat-btn').forEach(function (b) { b.classList.remove('is-active'); });
+}
+
+/** Закрывает автокомплит поиска. */
+function closeSearchAutocomplete() {
+  if (searchAutocompleteEl) searchAutocompleteEl.hidden = true;
+}
+
+/** Собирает все услуги в плоский массив { id, name, categoryName }. */
+function getAllServices() {
+  var list = [];
+  SERVICES.forEach(function (cat) {
+    cat.items.forEach(function (item) {
+      list.push({ id: item.id, name: item.name, categoryName: cat.name });
+    });
+  });
+  return list;
+}
+
+/** Показывает автокомплит поиска по запросу. */
+function showSearchAutocomplete(query) {
+  if (!searchAutocompleteListEl || !searchAutocompleteEl) return;
+  closeServicesDropdown();
+  var q = (query || '').trim().toLowerCase();
+  var all = getAllServices();
+  var matches = q.length === 0 ? all : all.filter(function (item) {
+    return item.name.toLowerCase().indexOf(q) !== -1 || item.categoryName.toLowerCase().indexOf(q) !== -1;
+  });
+
+  searchAutocompleteListEl.innerHTML = '';
+  matches.slice(0, 12).forEach(function (item) {
+    var li = document.createElement('li');
+    li.textContent = item.name + ' (' + item.categoryName + ')';
+    li.addEventListener('click', function () {
+      selectService(item.id, item.name);
+      closeSearchAutocomplete();
+      if (serviceSearchEl) serviceSearchEl.value = item.name;
+    });
+    searchAutocompleteListEl.appendChild(li);
+  });
+
+  searchAutocompleteEl.hidden = matches.length === 0;
 }
 
 /**
@@ -445,6 +489,17 @@ function showError(message) {
 // ═══════════════════════════════════════════════════════════════
 // СОБЫТИЯ
 // ═══════════════════════════════════════════════════════════════
+if (serviceSearchEl) {
+  serviceSearchEl.addEventListener('input', function () { showSearchAutocomplete(serviceSearchEl.value); });
+  serviceSearchEl.addEventListener('focus', function () { showSearchAutocomplete(serviceSearchEl.value); });
+}
+
+document.addEventListener('click', function (e) {
+  if (searchAutocompleteEl && !searchAutocompleteEl.hidden && serviceSearchWrapperEl && !serviceSearchWrapperEl.contains(e.target)) {
+    closeSearchAutocomplete();
+  }
+});
+
 formEl.addEventListener('submit', function (e) {
   e.preventDefault();
   var error = validateInput();

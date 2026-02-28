@@ -24,6 +24,16 @@
           <ul id="services-list" class="services-list"></ul>
         </div>
       </div>
+      <!-- Поисковая строка с автокомплитом (альтернатива выбору по категориям) -->
+      <label>
+        <span class="field-label">Или найдите услугу</span>
+        <div id="service-search-wrapper" class="service-search-wrapper">
+          <input type="text" id="service-search" class="service-search-input" placeholder="Поиск услуги..." autocomplete="off">
+          <div id="search-autocomplete" class="search-autocomplete" hidden>
+            <ul id="search-autocomplete-list" class="search-autocomplete-list"></ul>
+          </div>
+        </div>
+      </label>
       <!-- Отображение выбранной услуги и скрытое поле для расчёта -->
       <div id="selected-service-display" class="selected-service-display" hidden></div>
       <input type="hidden" id="selected-service-id" value="">

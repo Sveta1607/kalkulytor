@@ -148,6 +148,60 @@ h1 {
   color: #e8e8e8;
 }
 
+/* Поисковая строка с автокомплитом */
+.service-search-wrapper {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.service-search-input {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  background: #3d3d45;
+  border: 1px solid #4a4a54;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #e8e8e8;
+}
+
+.service-search-input:focus {
+  outline: none;
+  border-color: #7c6b9e;
+}
+
+.search-autocomplete {
+  position: absolute;
+  left: 0;
+  top: 100%;
+  width: 100%;
+  max-height: 220px;
+  overflow-y: auto;
+  margin-top: 4px;
+  background: #2d2d33;
+  border: 1px solid #4a4a54;
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  z-index: 100;
+}
+
+.search-autocomplete-list {
+  list-style: none;
+  padding: 0.25rem 0;
+  margin: 0;
+}
+
+.search-autocomplete-list li {
+  padding: 0.5rem 1rem;
+  color: #c8c8d0;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.search-autocomplete-list li:hover {
+  background: #3d3d45;
+  color: #fff;
+}
+
 /* Поля ввода и выпадающий список под тёмную тему */
 .form select,
 .form input[type="number"] {
